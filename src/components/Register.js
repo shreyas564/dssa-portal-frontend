@@ -2,23 +2,27 @@ import React, { useState } from 'react';
 import './Register.css';
 
 function Register({ onRegister }) {
+  const [enrollmentId, setEnrollmentId] = useState('');
+  const [rollNo, setRollNo] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [yearOfStudy, setYearOfStudy] = useState('');
+  const [division, setDivision] = useState('');
   const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [message, setMessage] = useState('');
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
-    if (!email || !name) {
-      setMessage('Please enter both email and name.');
+    if (!enrollmentId || !rollNo || !fullName || !yearOfStudy || !division || !email) {
+      setMessage('Please fill in all fields.');
       return;
     }
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name }),
+        body: JSON.stringify({ enrollmentId, rollNo, fullName, yearOfStudy, division, email }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -38,7 +42,7 @@ function Register({ onRegister }) {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/verify-otp-register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp }),
+        body: JSON.stringify({ email, otp, enrollmentId, rollNo, fullName, yearOfStudy, division }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -61,11 +65,52 @@ function Register({ onRegister }) {
         {!otpSent ? (
           <form onSubmit={handleSendOtp}>
             <div className="form-group">
-              <label>Name:</label>
+              <label>Enrollment ID:</label>
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={enrollmentId}
+                onChange={(e) => setEnrollmentId(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Roll No:</label>
+              <input
+                type="text"
+                value={rollNo}
+                onChange={(e) => setRollNo(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Full Name:</label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Year of Study:</label>
+              <select
+                value={yearOfStudy}
+                onChange={(e) => setYearOfStudy(e.target.value)}
+                required
+              >
+                <option value="">Select Year</option>
+                <option value="First">First</option>
+                <option value="Second">Second</option>
+                <option value="Third">Third</option>
+                <option value="Fourth">Fourth</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Division:</label>
+              <input
+                type="text"
+                value={division}
+                onChange={(e) => setDivision(e.target.value)}
                 required
               />
             </div>
