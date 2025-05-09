@@ -1,0 +1,188 @@
+.admin-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e0f7fa, #b3e5fc);
+  padding: 40px 20px;
+}
+
+.admin-card {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.admin-card h2 {
+  font-size: 28px;
+  color: #2d3748;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.admin-card h3 {
+  font-size: 20px;
+  color: #4a5568;
+  margin-top: 30px;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.admin-card h4 {
+  font-size: 18px;
+  color: #4a5568;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.admin-card p {
+  color: #718096;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background: #f7fafc;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+th, td {
+  border: 1px solid #e2e8f0;
+  padding: 14px;
+  text-align: left;
+  font-size: 14px;
+}
+
+th {
+  background: linear-gradient(135deg, #3182ce, #2b6cb0);
+  color: white;
+  font-weight: 600;
+}
+
+td {
+  color: #4a5568;
+}
+
+tr:hover {
+  background: #edf2f7;
+}
+
+.logout-button {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #e53e3e, #c53030);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: 0.3s;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.logout-button:hover {
+  background: linear-gradient(135deg, #c53030, #9b2c2c);
+}
+
+.action-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  margin: 0 5px;
+  transition: 0.3s;
+}
+
+.action-button.edit {
+  background: linear-gradient(135deg, #3182ce, #2b6cb0);
+  color: white;
+}
+
+.action-button.edit:hover {
+  background: linear-gradient(135deg, #2b6cb0, #2c5282);
+}
+
+.action-button.delete {
+  background: linear-gradient(135deg, #e53e3e, #c53030);
+  color: white;
+}
+
+.action-button.delete:hover {
+  background: linear-gradient(135deg, #c53030, #9b2c2c);
+}
+
+.action-button.save {
+  background: linear-gradient(135deg, #38a169, #2f855a);
+  color: white;
+}
+
+.action-button.save:hover {
+  background: linear-gradient(135deg, #2f855a, #276749);
+}
+
+.action-button.cancel {
+  background: linear-gradient(135deg, #a0aec0, #718096);
+  color: white;
+}
+
+.action-button.cancel:hover {
+  background: linear-gradient(135deg, #718096, #4a5568);
+}
+
+.edit-form {
+  margin-top: 30px;
+  padding: 20px;
+  background: #f7fafc;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #4a5568;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #3182ce;
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+}
+
+.error {
+  color: #e53e3e;
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.success {
+  color: #38a169;
+  margin-top: 15px;
+  font-size: 14px;
+}
