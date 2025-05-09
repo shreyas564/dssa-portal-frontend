@@ -4,6 +4,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import FacultyDashboard from './components/FacultyDashboard';
+import AdminDashboard from './components/AdminDashboard';
 import './App.css';
 
 function App() {
@@ -46,7 +47,10 @@ function App() {
       <Routes>
         <Route path="/" element={
           user ? (
-            user.role === 'Student' ? <Dashboard user={user} onLogout={handleLogout} /> : <FacultyDashboard user={user} onLogout={handleLogout} />
+            user.role === 'Student' ? <Dashboard user={user} onLogout={handleLogout} /> :
+            user.role === 'Faculty' ? <FacultyDashboard user={user} onLogout={handleLogout} /> :
+            user.role === 'Admin' ? <AdminDashboard user={user} onLogout={handleLogout} /> :
+            <Login onLogin={handleLogin} />
           ) : (
             <div className="landing-container">
               <div className="landing-card">
@@ -66,14 +70,20 @@ function App() {
         } />
         <Route path="/login" element={
           user ? (
-            user.role === 'Student' ? <Dashboard user={user} onLogout={handleLogout} /> : <FacultyDashboard user={user} onLogout={handleLogout} />
+            user.role === 'Student' ? <Dashboard user={user} onLogout={handleLogout} /> :
+            user.role === 'Faculty' ? <FacultyDashboard user={user} onLogout={handleLogout} /> :
+            user.role === 'Admin' ? <AdminDashboard user={user} onLogout={handleLogout} /> :
+            <Login onLogin={handleLogin} />
           ) : (
             <Login onLogin={handleLogin} />
           )
         } />
         <Route path="/register" element={
           user ? (
-            user.role === 'Student' ? <Dashboard user={user} onLogout={handleLogout} /> : <FacultyDashboard user={user} onLogout={handleLogout} />
+            user.role === 'Student' ? <Dashboard user={user} onLogout={handleLogout} /> :
+            user.role === 'Faculty' ? <FacultyDashboard user={user} onLogout={handleLogout} /> :
+            user.role === 'Admin' ? <AdminDashboard user={user} onLogout={handleLogout} /> :
+            <Login onLogin={handleLogin} />
           ) : (
             <Register onRegister={handleLogin} />
           )
@@ -88,6 +98,13 @@ function App() {
         <Route path="/faculty-dashboard" element={
           user && user.role === 'Faculty' ? (
             <FacultyDashboard user={user} onLogout={handleLogout} />
+          ) : (
+            <Login onLogin={handleLogin} />
+          )
+        } />
+        <Route path="/admin-dashboard" element={
+          user && user.role === 'Admin' ? (
+            <AdminDashboard user={user} onLogout={handleLogout} />
           ) : (
             <Login onLogin={handleLogin} />
           )
