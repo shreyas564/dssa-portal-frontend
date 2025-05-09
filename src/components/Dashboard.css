@@ -5,7 +5,7 @@
 }
 
 .dashboard-card {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   background: #ffffff;
   padding: 30px;
@@ -94,4 +94,42 @@ tr:hover {
   color: #38a169;
   margin-top: 15px;
   font-size: 14px;
+}
+
+.hierarchy-section {
+  margin-bottom: 30px;
+}
+
+.hierarchy-section h4 {
+  font-size: 18px;
+  color: #2d3748;
+  margin-bottom: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.hierarchy-subsection {
+  margin-left: 20px;
+  margin-bottom: 20px;
+}
+
+.hierarchy-subsection h5 {
+  font-size: 16px;
+  color: #4a5568;
+  margin-bottom: 10px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.hierarchy-item {
+  margin-left: 40px;
+  margin-bottom: 15px;
+}
+
+.hierarchy-item h6 {
+  font-size: 14px;
+  color: #718096;
+  margin-bottom: 10px;
+  font-weight: 600;
+  text-align: left;
 }
