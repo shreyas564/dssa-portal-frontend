@@ -1,100 +1,66 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import Login from './components/Login';
-import Register from './components/Register';
-import Dashboard from './components/Dashboard';
-import FacultyDashboard from './components/FacultyDashboard';
-import './App.css';
-
-function App() {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      fetch(`${process.env.REACT_APP_API_URL}/verify-token`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.error) {
-            localStorage.removeItem('token');
-          } else {
-            setUser(data);
-          }
-        })
-        .catch(err => {
-          console.error('Error verifying token:', err);
-          localStorage.removeItem('token');
-        });
-    }
-  }, []);
-
-  const handleLogin = (userData) => {
-    setUser(userData);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-  };
-
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={
-          user ? (
-            user.role === 'Student' ? <Dashboard user={user} onLogout={handleLogout} /> : <FacultyDashboard user={user} onLogout={handleLogout} />
-          ) : (
-            <div className="landing-container">
-              <div className="landing-card">
-                <h1>Welcome to DSSA Portal</h1>
-                <p>Please choose an option to continue</p>
-                <div className="landing-buttons">
-                  <Link to="/login">
-                    <button className="landing-button login">Login</button>
-                  </Link>
-                  <Link to="/register">
-                    <button className="landing-button register">Register</button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )
-        } />
-        <Route path="/login" element={
-          user ? (
-            user.role === 'Student' ? <Dashboard user={user} onLogout={handleLogout} /> : <FacultyDashboard user={user} onLogout={handleLogout} />
-          ) : (
-            <Login onLogin={handleLogin} />
-          )
-        } />
-        <Route path="/register" element={
-          user ? (
-            user.role === 'Student' ? <Dashboard user={user} onLogout={handleLogout} /> : <FacultyDashboard user={user} onLogout={handleLogout} />
-          ) : (
-            <Register onRegister={handleLogin} />
-          )
-        } />
-        <Route path="/dashboard" element={
-          user && user.role === 'Student' ? (
-            <Dashboard user={user} onLogout={handleLogout} />
-          ) : (
-            <Login onLogin={handleLogin} />
-          )
-        } />
-        <Route path="/faculty-dashboard" element={
-          user && user.role === 'Faculty' ? (
-            <FacultyDashboard user={user} onLogout={handleLogout} />
-          ) : (
-            <Login onLogin={handleLogin} />
-          )
-        } />
-      </Routes>
-    </Router>
-  );
+.landing-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e0f7fa, #b3e5fc);
+  padding: 20px;
 }
 
-export default App;
+.landing-card {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.landing-card h1 {
+  font-size: 28px;
+  color: #2d3748;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.landing-card p {
+  font-size: 16px;
+  color: #718096;
+  margin-bottom: 30px;
+}
+
+.landing-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.landing-button {
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  width: 100%;
+}
+
+.landing-button.login {
+  background: linear-gradient(135deg, #3182ce, #2b6cb0);
+  color: white;
+}
+
+.landing-button.login:hover {
+  background: linear-gradient(135deg, #2b6cb0, #2c5282);
+}
+
+.landing-button.register {
+  background: linear-gradient(135deg, #38a169, #2f855a);
+  color: white;
+}
+
+.landing-button.register:hover {
+  background: linear-gradient(135deg, #2f855a, #276749);
+}
