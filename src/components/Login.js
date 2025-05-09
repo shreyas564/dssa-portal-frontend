@@ -1,123 +1,101 @@
-import { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import './Login.css';
 
-function Login() {
-  const [step, setStep] = useState('email');
-  const [formData, setFormData] = useState({ email: '', otp: '' });
+function Login({ onLogin }) {
+  const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
   const [message, setMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
-  const handleEmailSubmit = async (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/send-otp`, {
-        email: formData.email,
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
       });
-      setMessage(response.data.message || 'OTP sent to your email');
-      setStep('otp');
-    } catch (error) {
-      console.error('Error in handleEmailSubmit:', error);
-      setMessage(error.response?.data?.error || 'Failed to send OTP');
-    } finally {
-      setIsLoading(false);
+      const data = await res.json();
+      if (res.ok) {
+        setOtpSent(true);
+        setMessage('OTP sent to your email.');
+      } else {
+        setMessage(data.error || 'Failed to send OTP.');
+      }
+    } catch (err) {
+      setMessage('Error: Failed to send OTP.');
     }
   };
 
-  const handleOtpSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/login`, {
-        email: formData.email,
-        otp: formData.otp,
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp }),
       });
-      localStorage.setItem('token', response.data.token);
-      setMessage('Login successful');
-      setTimeout(() => navigate('/dashboard'), 1000);
-    } catch (error) {
-      console.error('Error in handleOtpSubmit:', error);
-      setMessage(error.response?.data?.error || 'Login failed');
-    } finally {
-      setIsLoading(false);
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('token', data.token);
+        const userRes = await fetch(`${process.env.REACT_APP_API_URL}/verify-token`, {
+          headers: { 'Authorization': `Bearer ${data.token}` },
+        });
+        const userData = await userRes.json();
+        if (userRes.ok) {
+          onLogin(userData);
+        } else {
+          setMessage('Failed to verify user.');
+        }
+      } else {
+        setMessage(data.error || 'Login failed.');
+      }
+    } catch (err) {
+      setMessage('Error: Login failed.');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login (Student)</h2>
-        {step === 'email' ? (
-          <form onSubmit={handleEmailSubmit}>
-            <div className="mb-4">
-              <label className="block text-gray-700">Email</label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full p-2 border rounded"
-                placeholder="Email"
-                required
-                aria-label="Email"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
-            >
-              {isLoading ? 'Sending...' : 'Send OTP'}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleOtpSubmit}>
-            <div className="mb-4">
-              <label className="block text-gray-700">OTP</label>
-              <input
-                type="text"
-                value={formData.otp}
-                onChange={(e) => setFormData({ ...formData, otp: e.target.value })}
-                className="w-full p-2 border rounded"
-                placeholder="Enter OTP"
-                required
-                aria-label="OTP"
-                inputMode="numeric"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
-            >
-              {isLoading ? 'Logging in...' : 'Login'}
-            </button>
-            <button
-              type="button"
-              onClick={handleEmailSubmit}
-              className="mt-2 text-blue-500 hover:underline"
-            >
-              Resend OTP
-            </button>
-          </form>
-        )}
-        {message && (
-          <p
-            className={`mt-4 text-center ${
-              message.includes('successful') ? 'text-green-500' : 'text-red-500'
-            }`}
-          >
-            {message}
-          </p>
-        )}
-        <p className="mt-4 text-center">
-          Don't have an account?{' '}
-          <a href="/register" onClick={(e) => { e.preventDefault(); navigate('/register'); }} className="text-blue-500 hover:underline">
-            Register
-          </a>
-        </p>
-      </div>
+    <div className="login-container">
+      <h2>Login to DSSA Portal</h2>
+      {!otpSent ? (
+        <form onSubmit={handleSendOtp}>
+          <div className="form-group">
+            <label>Email:</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit">Send OTP</button>
+        </form>
+      ) : (
+        <form onSubmit={handleLogin}>
+          <div className="form-group">
+            <label>Email:</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled
+            />
+          </div>
+          <div className="form-group">
+            <label>OTP:</label>
+            <input
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit">Login</button>
+        </form>
+      )}
+      {message && <p className={message.startsWith('Error') ? 'error' : ''}>{message}</p>}
     </div>
   );
 }
