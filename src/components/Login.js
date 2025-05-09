@@ -13,12 +13,13 @@ function Login() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/send-otp`, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/send-otp`, {
         email: formData.email,
       });
-      setMessage('OTP sent to your email');
+      setMessage(response.data.message || 'OTP sent to your email');
       setStep('otp');
     } catch (error) {
+      console.error('Error in handleEmailSubmit:', error);
       setMessage(error.response?.data?.error || 'Failed to send OTP');
     } finally {
       setIsLoading(false);
@@ -33,14 +34,11 @@ function Login() {
         email: formData.email,
         otp: formData.otp,
       });
-      const token = response.data.token;
-      localStorage.setItem('token', token);
-      chrome.storage.local.set({ jwtToken: token }, () => {
-        console.log('JWT token stored in chrome.storage');
-      });
+      localStorage.setItem('token', response.data.token);
       setMessage('Login successful');
-      navigate('/dashboard');
+      setTimeout(() => navigate('/dashboard'), 1000);
     } catch (error) {
+      console.error('Error in handleOtpSubmit:', error);
       setMessage(error.response?.data?.error || 'Login failed');
     } finally {
       setIsLoading(false);
@@ -115,7 +113,7 @@ function Login() {
         )}
         <p className="mt-4 text-center">
           Don't have an account?{' '}
-          <a href="/register" className="text-blue-500 hover:underline">
+          <a href="/register" onClick={(e) => { e.preventDefault(); navigate('/register'); }} className="text-blue-500 hover:underline">
             Register
           </a>
         </p>
