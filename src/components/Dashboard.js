@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './Dashboard.css';
 
 function Dashboard({ user, onLogout }) {
   const [marks, setMarks] = useState([]);
@@ -25,43 +26,36 @@ function Dashboard({ user, onLogout }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-10">
-      <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Student Dashboard</h2>
-        <p className="text-gray-600 text-center mb-6">Welcome, {user.name} ({user.email})</p>
-        <button
-          onClick={onLogout}
-          className="w-full md:w-auto py-3 px-6 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all shadow-md mb-8"
-        >
-          Logout
-        </button>
-        <h3 className="text-xl font-semibold text-gray-700 mb-4">Your Marks</h3>
+    <div className="dashboard-container">
+      <div className="dashboard-card">
+        <h2>Student Dashboard</h2>
+        <p>Welcome, {user.name} ({user.email})</p>
+        <button onClick={onLogout} className="logout-button">Logout</button>
+        <h3>Your Marks</h3>
         {marks.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse bg-white rounded-lg shadow-sm">
-              <thead>
-                <tr>
-                  <th className="p-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-left">Course Name</th>
-                  <th className="p-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-left">Score</th>
-                  <th className="p-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-left">Timestamp</th>
+          <table>
+            <thead>
+              <tr>
+                <th>Course Name</th>
+                <th>Score</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              {marks.map((mark, index) => (
+                <tr key={index}>
+                  <td>{mark.courseName}</td>
+                  <td>{mark.score}</td>
+                  <td>{new Date(mark.timestamp).toLocaleString()}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {marks.map((mark, index) => (
-                  <tr key={index} className="border-b hover:bg-gray-50">
-                    <td className="p-4 text-gray-700">{mark.courseName}</td>
-                    <td className="p-4 text-gray-700">{mark.score}</td>
-                    <td className="p-4 text-gray-700">{new Date(mark.timestamp).toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         ) : (
-          <p className="text-gray-600 text-center">No marks submitted yet.</p>
+          <p>No marks submitted yet.</p>
         )}
         {message && (
-          <p className={`mt-4 text-center ${message.includes('Error') || message.includes('failed') ? 'text-red-500' : 'text-green-500'}`}>
+          <p className={message.includes('Error') || message.includes('failed') ? 'error' : 'success'}>
             {message}
           </p>
         )}
