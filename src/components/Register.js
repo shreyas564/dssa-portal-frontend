@@ -1,133 +1,129 @@
-import { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 
-function Register() {
-  const [step, setStep] = useState('email');
-  const [formData, setFormData] = useState({ email: '', name: '', otp: '' });
+function Register({ onRegister }) {
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
   const [message, setMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
-  const handleEmailSubmit = async (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    if (!email || !name) {
+      setMessage('Please enter both email and name.');
+      return;
+    }
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/register`, {
-        email: formData.email,
-        name: formData.name,
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name }),
       });
-      setMessage(response.data.message || 'OTP sent to your email');
-      setStep('otp');
-    } catch (error) {
-      console.error('Error in handleEmailSubmit:', error);
-      setMessage(error.response?.data?.error || 'Failed to send OTP');
-    } finally {
-      setIsLoading(false);
+      const data = await res.json();
+      if (res.ok) {
+        setOtpSent(true);
+        setMessage('OTP sent to your email.');
+      } else {
+        setMessage(data.error || 'Failed to send OTP.');
+      }
+    } catch (err) {
+      setMessage('Error: Failed to send OTP.');
     }
   };
 
-  const handleOtpSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/verify-otp-register`, {
-        email: formData.email,
-        otp: formData.otp,
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/verify-otp-register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp }),
       });
-      setMessage(response.data.message || 'Registration successful');
-      setTimeout(() => navigate('/login'), 1000);
-    } catch (error) {
-      console.error('Error in handleOtpSubmit:', error);
-      setMessage(error.response?.data?.error || 'Registration failed');
-    } finally {
-      setIsLoading(false);
+      const data = await res.json();
+      if (res.ok) {
+        setMessage('Registration successful! Redirecting to login...');
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
+      } else {
+        setMessage(data.error || 'Registration failed.');
+      }
+    } catch (err) {
+      setMessage('Error: Registration failed.');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Register (Student)</h2>
-        {step === 'email' ? (
-          <form onSubmit={handleEmailSubmit}>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Register for DSSA Portal</h2>
+        {!otpSent ? (
+          <form onSubmit={handleSendOtp}>
             <div className="mb-4">
-              <label className="block text-gray-700">Email</label>
+              <label className="block text-gray-700 font-medium mb-2">Name:</label>
               <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full p-2 border rounded"
-                placeholder="Email"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
-                aria-label="Email"
               />
             </div>
             <div className="mb-4">
-              <label className="block text-gray-700">Name</label>
+              <label className="block text-gray-700 font-medium mb-2">Email:</label>
               <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full p-2 border rounded"
-                placeholder="Name"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
-                aria-label="Name"
               />
             </div>
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
+              className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all shadow-md"
             >
-              {isLoading ? 'Sending...' : 'Send OTP'}
+              Send OTP
             </button>
           </form>
         ) : (
-          <form onSubmit={handleOtpSubmit}>
+          <form onSubmit={handleRegister}>
             <div className="mb-4">
-              <label className="block text-gray-700">OTP</label>
+              <label className="block text-gray-700 font-medium mb-2">Email:</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
+                disabled
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">OTP:</label>
               <input
                 type="text"
-                value={formData.otp}
-                onChange={(e) => setFormData({ ...formData, otp: e.target.value })}
-                className="w-full p-2 border rounded"
-                placeholder="Enter OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
-                aria-label="OTP"
-                inputMode="numeric"
               />
             </div>
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
+              className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all shadow-md"
             >
-              {isLoading ? 'Registering...' : 'Register'}
-            </button>
-            <button
-              type="button"
-              onClick={handleEmailSubmit}
-              className="mt-2 text-blue-500 hover:underline"
-            >
-              Resend OTP
+              Verify OTP & Register
             </button>
           </form>
         )}
         {message && (
-          <p
-            className={`mt-4 text-center ${
-              message.includes('successful') ? 'text-green-500' : 'text-red-500'
-            }`}
-          >
+          <p className={`mt-4 text-center ${message.includes('Error') || message.includes('failed') ? 'text-red-500' : 'text-green-500'}`}>
             {message}
           </p>
         )}
         <p className="mt-4 text-center">
           Already have an account?{' '}
-          <a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }} className="text-blue-500 hover:underline">
-            Login
-          </a>
+          <a href="/login" className="text-indigo-600 hover:underline">Login here</a>
         </p>
       </div>
     </div>
