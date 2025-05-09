@@ -13,13 +13,14 @@ function Register() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/register`, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/register`, {
         email: formData.email,
         name: formData.name,
       });
-      setMessage('OTP sent to your email');
+      setMessage(response.data.message || 'OTP sent to your email');
       setStep('otp');
     } catch (error) {
+      console.error('Error in handleEmailSubmit:', error);
       setMessage(error.response?.data?.error || 'Failed to send OTP');
     } finally {
       setIsLoading(false);
@@ -30,13 +31,14 @@ function Register() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/verify-otp-register`, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/verify-otp-register`, {
         email: formData.email,
         otp: formData.otp,
       });
-      setMessage('Registration successful');
+      setMessage(response.data.message || 'Registration successful');
       setTimeout(() => navigate('/login'), 1000);
     } catch (error) {
+      console.error('Error in handleOtpSubmit:', error);
       setMessage(error.response?.data?.error || 'Registration failed');
     } finally {
       setIsLoading(false);
@@ -123,7 +125,7 @@ function Register() {
         )}
         <p className="mt-4 text-center">
           Already have an account?{' '}
-          <a href="/login" className="text-blue-500 hover:underline">
+          <a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }} className="text-blue-500 hover:underline">
             Login
           </a>
         </p>
