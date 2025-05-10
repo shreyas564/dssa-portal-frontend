@@ -17,31 +17,13 @@ const AdminDashboard = () => {
   const [formData, setFormData] = useState({});
 
   const token = localStorage.getItem('token');
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL = process.env.REACT_APP_API_URL || 'https://dssa-portal-backend.onrender.com';
   const navigate = useNavigate();
 
-  // Debug: Log navigate to ensure it's available
-  console.log('Navigate hook:', navigate);
-
-  // Check token on mount and redirect if missing
-  useEffect(() => {
-    if (!token) {
-      console.log('No token found, redirecting to login');
-      navigate('/login');
-    }
-  }, [token, navigate]);
-
-  // Handle logout
+  // Handle logout (simplified to match Student Dashboard)
   const handleLogout = () => {
-    console.log('Logout button clicked');
-    try {
-      localStorage.removeItem('token');
-      console.log('Token removed from localStorage');
-      navigate('/login');
-      console.log('Navigation to /login triggered');
-    } catch (error) {
-      console.error('Error during logout:', error);
-    }
+    localStorage.removeItem('token');
+    navigate('/login');
   };
 
   // Fetch users by role
@@ -54,8 +36,12 @@ const AdminDashboard = () => {
       setUsers(response.data);
       setError('');
     } catch (err) {
-      setError('Failed to fetch users');
+      setError('Failed to fetch users: ' + (err.response?.data?.error || err.message));
       setUsers([]);
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/login');
+      }
     }
   };
 
@@ -68,8 +54,12 @@ const AdminDashboard = () => {
       setYears(response.data);
       setError('');
     } catch (err) {
-      setError('Failed to fetch years');
+      setError('Failed to fetch years: ' + (err.response?.data?.error || err.message));
       setYears([]);
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/login');
+      }
     }
   };
 
@@ -89,8 +79,12 @@ const AdminDashboard = () => {
         setEditingUser(null);
         setError('');
       } catch (err) {
-        setError('Failed to fetch divisions');
+        setError('Failed to fetch divisions: ' + (err.response?.data?.error || err.message));
         setDivisions([]);
+        if (err.response?.status === 401) {
+          localStorage.removeItem('token');
+          navigate('/login');
+        }
       }
     };
     fetchDivisions();
@@ -111,8 +105,12 @@ const AdminDashboard = () => {
         setEditingUser(null);
         setError('');
       } catch (err) {
-        setError('Failed to fetch roll numbers');
+        setError('Failed to fetch roll numbers: ' + (err.response?.data?.error || err.message));
         setRollNos([]);
+        if (err.response?.status === 401) {
+          localStorage.removeItem('token');
+          navigate('/login');
+        }
       }
     };
     fetchRollNos();
@@ -130,8 +128,12 @@ const AdminDashboard = () => {
       setEditingUser(null);
       setError('');
     } catch (err) {
-      setError('Failed to fetch student details');
+      setError('Failed to fetch student details: ' + (err.response?.data?.error || err.message));
       setStudentData(null);
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/login');
+      }
     }
   };
 
@@ -211,6 +213,10 @@ const AdminDashboard = () => {
       setError('');
     } catch (err) {
       setError('Failed to update user: ' + (err.response?.data?.error || 'Unknown error'));
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/login');
+      }
     }
   };
 
