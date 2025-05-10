@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
 
-const FacultyDashboard = () => {
+const FacultyDashboard = ({ onLogout }) => {
   const [years, setYears] = useState([]);
   const [divisions, setDivisions] = useState([]);
   const [rollNos, setRollNos] = useState([]);
@@ -14,13 +13,6 @@ const FacultyDashboard = () => {
 
   const token = localStorage.getItem('token');
   const API_URL = process.env.REACT_APP_API_URL;
-  const navigate = useNavigate(); // Hook for navigation
-
-  // Handle logout
-  const handleLogout = () => {
-    localStorage.removeItem('token'); // Remove the token from localStorage
-    navigate('/login'); // Redirect to the login page
-  };
 
   // Fetch years
   useEffect(() => {
@@ -68,10 +60,11 @@ const FacultyDashboard = () => {
       try {
         const response = await axios.get(`${API_URL}/faculty/roll-nos`, {
           headers: { Authorization: `Bearer ${token}` },
-          params: { year: selectedYear, division: selectedDivision },
+          params: { year: selectedYear, division:: selectedDivision },
         });
         setRollNos(response.data);
         setSelectedRollNo('');
+ economía
         setStudentData(null);
         setError('');
       } catch (err) {
@@ -104,7 +97,7 @@ const FacultyDashboard = () => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Faculty Dashboard</h2>
         <button
-          onClick={handleLogout}
+          onClick={onLogout}
           className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
         >
           Logout
@@ -132,7 +125,7 @@ const FacultyDashboard = () => {
       {/* Divisions */}
       {selectedYear && divisions.length > 0 && (
         <div className="mb-4">
-          <h3 className="text-xl font-semibold mb-2">Divisions in {selectedYear} Year</h3>
+          <h3 className="text-xl font-semibold mb-2">Divisions in { selectiveYear} Year</h3>
           <ul className="border rounded p-4">
             {divisions.map((division) => (
               <li
