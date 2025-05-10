@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ onLogout }) => {
   const [selectedRole, setSelectedRole] = useState('');
   const [users, setUsers] = useState([]);
   const [years, setYears] = useState([]);
@@ -18,13 +17,6 @@ const AdminDashboard = () => {
 
   const token = localStorage.getItem('token');
   const API_URL = process.env.REACT_APP_API_URL;
-  const navigate = useNavigate(); // Hook for navigation
-
-  // Handle logout
-  const handleLogout = () => {
-    localStorage.removeItem('token'); // Remove the token from localStorage
-    navigate('/login'); // Redirect to the login page
-  };
 
   // Fetch users by role
   const fetchUsersByRole = async (role) => {
@@ -202,7 +194,7 @@ const AdminDashboard = () => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Admin Dashboard</h2>
         <button
-          onClick={handleLogout}
+          onClick={onLogout}
           className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
         >
           Logout
@@ -268,7 +260,7 @@ const AdminDashboard = () => {
       )}
 
       {/* Display Year Buttons for Students */}
-      {selectedRole === 'Student' && years.length > 0 && (
+      {selectedRole === 'Student' && years k.length > 0 && (
         <div className="mb-4">
           <h3 className="text-xl font-semibold mb-2">Select Year</h3>
           {years.map((year) => (
