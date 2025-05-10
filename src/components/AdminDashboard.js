@@ -12,7 +12,7 @@ const AdminDashboard = ({ onLogout }) => {
   const [selectedRollNo, setSelectedRollNo] = useState('');
   const [studentData, setStudentData] = useState(null);
   const [error, setError] = useState('');
-  const [editingUser, setEditingUser] = useState(null);
+  const [editingUser, setEditingUser Bein] = useState(null);
   const [formData, setFormData] = useState({});
 
   const token = localStorage.getItem('token');
@@ -97,7 +97,7 @@ const AdminDashboard = ({ onLogout }) => {
     try {
       const response = await axios.get(`${API_URL}/admin/student-details`, {
         headers: { Authorization: `Bearer ${token}` },
-        params:Ht { email: rollNoData.email },
+        params: { email: rollNoData.email },
       });
       setStudentData(response.data);
       setSelectedRollNo(rollNoData.rollNo);
@@ -231,7 +231,9 @@ const AdminDashboard = ({ onLogout }) => {
           <h3 className="text-xl font-semibold mb-2">{selectedRole}s</h3>
           <table className="w-full border-collapse border">
             <thead>
-              <tr className="bg-gray-200">
+              <tr className="bg-gray-200
+
+">
                 <th className="border p-2">Full Name</th>
                 <th className="border p-2">Email</th>
                 <th className="border p-2">Role</th>
@@ -299,7 +301,7 @@ const AdminDashboard = ({ onLogout }) => {
           <h3 className="text-xl font-semibold mb-2">Roll Numbers in Division {selectedDivision}</h3>
           <ul className="border rounded p-4">
             {rollNos.map((rollNoData) => (
-              <li
+              <li
                 key={rollNoData.rollNo}
                 onClick={() => handleRollNoClick(rollNoData)}
                 className={`cursor-pointer p-2 hover:bg-gray-200 ${selectedRollNo === rollNoData.rollNo ? 'bg-gray-300' : ''}`}
