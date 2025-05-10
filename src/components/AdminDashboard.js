@@ -1,215 +1,257 @@
 import React, { useState, useEffect } from 'react';
-import './AdminDashboard.css';
+import axios from 'axios';
 
-function AdminDashboard({ user, onLogout }) {
+const AdminDashboard = () => {
+  const [selectedRole, setSelectedRole] = useState('');
   const [users, setUsers] = useState([]);
-  const [message, setMessage] = useState('');
-  const [editingUser, setEditingUser] = useState(null);
-  const [editForm, setEditForm] = useState({});
+  const [years, setYears] = useState([]);
+  const [divisions, setDivisions] = useState([]);
+  const [rollNos, setRollNos] = useState([]);
+  const [selectedYear, setSelectedYear] = useState('');
+  const [selectedDivision, setSelectedDivision] = useState('');
+  const [selectedRollNo, setSelectedRollNo] = useState('');
+  const [studentData, setStudentData] = useState(null);
+  const [error, setError] = useState('');
 
+  const token = localStorage.getItem('token');
+  const API_URL = process.env.REACT_APP_API_URL;
+
+  // Fetch users by role when a role is selected
+  const fetchUsersByRole = async (role) => {
+    try {
+      const response = await axios.get(`${API_URL}/admin/users-by-role`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { role },
+      });
+      setUsers(response.data);
+      setError('');
+    } catch (err) {
+      setError('Failed to fetch users');
+      setUsers([]);
+    }
+  };
+
+  // Fetch years when "Students" role is selected
+  const fetchStudentYears = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/admin/student-years`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setYears(response.data);
+      setError('');
+    } catch (err) {
+      setError('Failed to fetch years');
+      setYears([]);
+    }
+  };
+
+  // Fetch divisions when a year is selected
   useEffect(() => {
-    const fetchUsers = async () => {
+    if (!selectedYear) return;
+    const fetchDivisions = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/admin/users`, {
-          headers: { 'Authorization': `Bearer ${token}` },
+        const response = await axios.get(`${API_URL}/admin/student-divisions`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { year: selectedYear },
         });
-        const data = await res.json();
-        if (res.ok) {
-          setUsers(data);
-        } else {
-          setMessage(data.error || 'Failed to fetch users.');
-        }
+        setDivisions(response.data);
+        setSelectedDivision('');
+        setRollNos([]);
+        setStudentData(null);
+        setError('');
       } catch (err) {
-        setMessage('Error: Failed to fetch users.');
+        setError('Failed to fetch divisions');
+        setDivisions([]);
       }
     };
-    fetchUsers();
-  }, []);
+    fetchDivisions();
+  }, [selectedYear]);
 
-  const handleEdit = (user) => {
-    setEditingUser(user);
-    setEditForm({
-      enrollmentId: user.enrollmentId || '',
-      rollNo: user.rollNo || '',
-      fullName: user.fullName || '',
-      yearOfStudy: user.yearOfStudy || '',
-      division: user.division || '',
-      email: user.email || '',
-      role: user.role || 'Student',
-    });
-  };
-
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/admin/users/${editingUser._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(editForm),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setUsers(users.map((u) => (u._id === editingUser._id ? { ...u, ...editForm } : u)));
-        setEditingUser(null);
-        setMessage('User updated successfully.');
-      } else {
-        setMessage(data.error || 'Failed to update user.');
+  // Fetch roll numbers when a division is selected
+  useEffect(() => {
+    if (!selectedYear || !selectedDivision) return;
+    const fetchRollNos = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/admin/student-roll-nos`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { year: selectedYear, division: selectedDivision },
+        });
+        setRollNos(response.data);
+        setSelectedRollNo('');
+        setStudentData(null);
+        setError('');
+      } catch (err) {
+        setError('Failed to fetch roll numbers');
+        setRollNos([]);
       }
+    };
+    fetchRollNos();
+  }, [selectedYear, selectedDivision]);
+
+  // Fetch student details when a roll number is selected
+  const handleRollNoClick = async (rollNoData) => {
+    try {
+      const response = await axios.get(`${API_URL}/admin/student-details`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { email: rollNoData.email },
+      });
+      setStudentData(response.data);
+      setSelectedRollNo(rollNoData.rollNo);
+      setError('');
     } catch (err) {
-      setMessage('Error: Failed to update user.');
+      setError('Failed to fetch student details');
+      setStudentData(null);
     }
   };
 
-  const handleDelete = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/admin/users/${userId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setUsers(users.filter((u) => u._id !== userId));
-        setMessage('User deleted successfully.');
-      } else {
-        setMessage(data.error || 'Failed to delete user.');
-      }
-    } catch (err) {
-      setMessage('Error: Failed to delete user.');
+  // Handle role button click
+  const handleRoleClick = (role) => {
+    setSelectedRole(role);
+    setUsers([]);
+    setYears([]);
+    setDivisions([]);
+    setRollNos([]);
+    setSelectedYear('');
+    setSelectedDivision('');
+    setSelectedRollNo('');
+    setStudentData(null);
+
+    if (role === 'Student') {
+      fetchStudentYears();
+    } else {
+      fetchUsersByRole(role);
     }
+  };
+
+  // Handle year button click
+  const handleYearClick = (year) => {
+    setSelectedYear(year);
+    setDivisions([]);
+    setRollNos([]);
+    setSelectedDivision('');
+    setSelectedRollNo('');
+    setStudentData(null);
   };
 
   return (
-    <div className="admin-container">
-      <div className="admin-card">
-        <h2>Admin Dashboard</h2>
-        <p>Welcome, {user.name} ({user.email})</p>
-        <button onClick={onLogout} className="logout-button">Logout</button>
-        <h3>Manage Users</h3>
-        {users.length > 0 ? (
-          <table>
+    <div className="p-6">
+      <h2 className="text-2xl font-bold mb-4">Admin Dashboard</h2>
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+
+      {/* Role Buttons */}
+      <div className="mb-4">
+        <button
+          onClick={() => handleRoleClick('Admin')}
+          className={`mr-2 px-4 py-2 rounded ${selectedRole === 'Admin' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+        >
+          Admins
+        </button>
+        <button
+          onClick={() => handleRoleClick('Faculty')}
+          className={`mr-2 px-4 py-2 rounded ${selectedRole === 'Faculty' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+        >
+          Faculty
+        </button>
+        <button
+          onClick={() => handleRoleClick('Student')}
+          className={`px-4 py-2 rounded ${selectedRole === 'Student' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+        >
+          Students
+        </button>
+      </div>
+
+      {/* Display Admins or Faculty */}
+      {(selectedRole === 'Admin' || selectedRole === 'Faculty') && users.length > 0 && (
+        <div className="mb-4">
+          <h3 className="text-xl font-semibold mb-2">{selectedRole}s</h3>
+          <table className="w-full border-collapse border">
             <thead>
-              <tr>
-                <th>Enrollment ID</th>
-                <th>Roll No</th>
-                <th>Full Name</th>
-                <th>Year</th>
-                <th>Division</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Actions</th>
+              <tr className="bg-gray-200">
+                <th className="border p-2">Full Name</th>
+                <th className="border p-2">Email</th>
+                <th className="border p-2">Role</th>
               </tr>
             </thead>
             <tbody>
-              {users.map((u) => (
-                <tr key={u._id}>
-                  <td>{u.enrollmentId || '-'}</td>
-                  <td>{u.rollNo || '-'}</td>
-                  <td>{u.fullName || '-'}</td>
-                  <td>{u.yearOfStudy || '-'}</td>
-                  <td>{u.division || '-'}</td>
-                  <td>{u.email}</td>
-                  <td>{u.role}</td>
-                  <td>
-                    <button onClick={() => handleEdit(u)} className="action-button edit">Edit</button>
-                    <button onClick={() => handleDelete(u._id)} className="action-button delete">Delete</button>
-                  </td>
+              {users.map((user) => (
+                <tr key={user._id}>
+                  <td className="border p-2">{user.fullName || 'N/A'}</td>
+                  <td className="border p-2">{user.email}</td>
+                  <td className="border p-2">{user.role}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        ) : (
-          <p>No users available.</p>
-        )}
-        {editingUser && (
-          <div className="edit-form">
-            <h4>Edit User: {editingUser.email}</h4>
-            <form onSubmit={handleUpdate}>
-              <div className="form-group">
-                <label>Enrollment ID:</label>
-                <input
-                  type="text"
-                  value={editForm.enrollmentId}
-                  onChange={(e) => setEditForm({ ...editForm, enrollmentId: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Roll No:</label>
-                <input
-                  type="text"
-                  value={editForm.rollNo}
-                  onChange={(e) => setEditForm({ ...editForm, rollNo: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Full Name:</label>
-                <input
-                  type="text"
-                  value={editForm.fullName}
-                  onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Year of Study:</label>
-                <select
-                  value={editForm.yearOfStudy}
-                  onChange={(e) => setEditForm({ ...editForm, yearOfStudy: e.target.value })}
-                >
-                  <option value="">Select Year</option>
-                  <option value="First">First</option>
-                  <option value="Second">Second</option>
-                  <option value="Third">Third</option>
-                  <option value="Fourth">Fourth</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Division:</label>
-                <input
-                  type="text"
-                  value={editForm.division}
-                  onChange={(e) => setEditForm({ ...editForm, division: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Email:</label>
-                <input
-                  type="email"
-                  value={editForm.email}
-                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Role:</label>
-                <select
-                  value={editForm.role}
-                  onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
-                  required
-                >
-                  <option value="Student">Student</option>
-                  <option value="Faculty">Faculty</option>
-                  <option value="Admin">Admin</option>
-                </select>
-              </div>
-              <button type="submit" className="action-button save">Save</button>
-              <button onClick={() => setEditingUser(null)} className="action-button cancel">Cancel</button>
-            </form>
-          </div>
-        )}
-        {message && (
-          <p className={message.includes('Error') || message.includes('failed') ? 'error' : 'success'}>
-            {message}
-          </p>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Display Year Buttons for Students */}
+      {selectedRole === 'Student' && years.length > 0 && (
+        <div className="mb-4">
+          <h3 className="text-xl font-semibold mb-2">Select Year</h3>
+          {years.map((year) => (
+            <button
+              key={year}
+              onClick={() => handleYearClick(year)}
+              className={`mr-2 px-4 py-2 rounded ${selectedYear === year ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+            >
+              {year} Year
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Display Divisions */}
+      {selectedYear && divisions.length > 0 && (
+        <div className="mb-4">
+          <h3 className="text-xl font-semibold mb-2">Divisions in {selectedYear} Year</h3>
+          <ul className="border rounded p-4">
+            {divisions.map((division) => (
+              <li
+                key={division}
+                onClick={() => setSelectedDivision(division)}
+                className={`cursor-pointer p-2 hover:bg-gray-200 ${selectedDivision === division ? 'bg-gray-300' : ''}`}
+              >
+                {division}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Display Roll Numbers */}
+      {selectedDivision && rollNos.length > 0 && (
+        <div className="mb-4">
+          <h3 className="text-xl font-semibold mb-2">Roll Numbers in Division {selectedDivision}</h3>
+          <ul className="border rounded p-4">
+            {rollNos.map((rollNoData) => (
+              <li
+                key={rollNoData.rollNo}
+                onClick={() => handleRollNoClick(rollNoData)}
+                className={`cursor-pointer p-2 hover:bg-gray-200 ${selectedRollNo === rollNoData.rollNo ? 'bg-gray-300' : ''}`}
+              >
+                {rollNoData.rollNo}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Display Student Details */}
+      {studentData && (
+        <div>
+          <h3 className="text-xl font-semibold mb-2">Student Details</h3>
+          <p><strong>Full Name:</strong> {studentData.fullName}</p>
+          <p><strong>Enrollment ID:</strong> {studentData.enrollmentId}</p>
+          <p><strong>Roll No:</strong> {studentData.rollNo}</p>
+          <p><strong>Year of Study:</strong> {studentData.yearOfStudy}</p>
+          <p><strong>Division:</strong> {studentData.division}</p>
+          <p><strong>Email:</strong> {studentData.email}</p>
+          <p><strong>Role:</strong> {studentData.role}</p>
+        </div>
+      )}
     </div>
   );
-}
+};
 
 export default AdminDashboard;
