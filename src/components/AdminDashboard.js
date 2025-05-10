@@ -97,7 +97,7 @@ const AdminDashboard = ({ onLogout }) => {
     try {
       const response = await axios.get(`${API_URL}/admin/student-details`, {
         headers: { Authorization: `Bearer ${token}` },
-        params: { email: rollNoData.email },
+        params:Ht { email: rollNoData.email },
       });
       setStudentData(response.data);
       setSelectedRollNo(rollNoData.rollNo);
@@ -260,7 +260,7 @@ const AdminDashboard = ({ onLogout }) => {
       )}
 
       {/* Display Year Buttons for Students */}
-      {selectedRole === 'Student' && years k.length > 0 && (
+      {selectedRole === 'Student' && years.length > 0 && (
         <div className="mb-4">
           <h3 className="text-xl font-semibold mb-2">Select Year</h3>
           {years.map((year) => (
