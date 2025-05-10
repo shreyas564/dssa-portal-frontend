@@ -12,11 +12,13 @@ const AdminDashboard = () => {
   const [selectedRollNo, setSelectedRollNo] = useState('');
   const [studentData, setStudentData] = useState(null);
   const [error, setError] = useState('');
+  const [editingUser, setEditingUser] = useState(null);
+  const [formData, setFormData] = useState({});
 
   const token = localStorage.getItem('token');
   const API_URL = process.env.REACT_APP_API_URL;
 
-  // Fetch users by role when a role is selected
+  // Fetch users by role
   const fetchUsersByRole = async (role) => {
     try {
       const response = await axios.get(`${API_URL}/admin/users-by-role`, {
@@ -31,7 +33,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Fetch years when "Students" role is selected
+  // Fetch years for Students
   const fetchStudentYears = async () => {
     try {
       const response = await axios.get(`${API_URL}/admin/student-years`, {
@@ -45,7 +47,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Fetch divisions when a year is selected
+  // Fetch divisions for a selected year
   useEffect(() => {
     if (!selectedYear) return;
     const fetchDivisions = async () => {
@@ -58,6 +60,7 @@ const AdminDashboard = () => {
         setSelectedDivision('');
         setRollNos([]);
         setStudentData(null);
+        setEditingUser(null);
         setError('');
       } catch (err) {
         setError('Failed to fetch divisions');
@@ -67,7 +70,7 @@ const AdminDashboard = () => {
     fetchDivisions();
   }, [selectedYear]);
 
-  // Fetch roll numbers when a division is selected
+  // Fetch roll numbers for a selected division
   useEffect(() => {
     if (!selectedYear || !selectedDivision) return;
     const fetchRollNos = async () => {
@@ -79,6 +82,7 @@ const AdminDashboard = () => {
         setRollNos(response.data);
         setSelectedRollNo('');
         setStudentData(null);
+        setEditingUser(null);
         setError('');
       } catch (err) {
         setError('Failed to fetch roll numbers');
@@ -88,7 +92,7 @@ const AdminDashboard = () => {
     fetchRollNos();
   }, [selectedYear, selectedDivision]);
 
-  // Fetch student details when a roll number is selected
+  // Fetch student details
   const handleRollNoClick = async (rollNoData) => {
     try {
       const response = await axios.get(`${API_URL}/admin/student-details`, {
@@ -97,6 +101,7 @@ const AdminDashboard = () => {
       });
       setStudentData(response.data);
       setSelectedRollNo(rollNoData.rollNo);
+      setEditingUser(null);
       setError('');
     } catch (err) {
       setError('Failed to fetch student details');
@@ -115,6 +120,7 @@ const AdminDashboard = () => {
     setSelectedDivision('');
     setSelectedRollNo('');
     setStudentData(null);
+    setEditingUser(null);
 
     if (role === 'Student') {
       fetchStudentYears();
@@ -131,6 +137,55 @@ const AdminDashboard = () => {
     setSelectedDivision('');
     setSelectedRollNo('');
     setStudentData(null);
+    setEditingUser(null);
+  };
+
+  // Start editing a user
+  const handleEditClick = (user) => {
+    setEditingUser(user);
+    setFormData({
+      enrollmentId: user.enrollmentId || '',
+      rollNo: user.rollNo || '',
+      fullName: user.fullName || '',
+      yearOfStudy: user.yearOfStudy || '',
+      division: user.division || '',
+      email: user.email || '',
+      role: user.role || '',
+    });
+  };
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  // Submit updated user details
+  const handleUpdateSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.put(
+        `${API_URL}/admin/users/${editingUser._id}`,
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setEditingUser(null);
+
+      // Refresh the data based on the role
+      if (selectedRole === 'Student') {
+        const rollNoData = rollNos.find((r) => r.rollNo === selectedRollNo);
+        if (rollNoData) {
+          handleRollNoClick(rollNoData); // Refresh student details
+        }
+      } else {
+        fetchUsersByRole(selectedRole); // Refresh Admins/Faculty list
+      }
+      setError('');
+    } catch (err) {
+      setError('Failed to update user: ' + (err.response?.data?.error || 'Unknown error'));
+    }
   };
 
   return (
@@ -170,6 +225,7 @@ const AdminDashboard = () => {
                 <th className="border p-2">Full Name</th>
                 <th className="border p-2">Email</th>
                 <th className="border p-2">Role</th>
+                <th className="border p-2">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -178,6 +234,14 @@ const AdminDashboard = () => {
                   <td className="border p-2">{user.fullName || 'N/A'}</td>
                   <td className="border p-2">{user.email}</td>
                   <td className="border p-2">{user.role}</td>
+                  <td className="border p-2">
+                    <button
+                      onClick={() => handleEditClick(user)}
+                      className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Edit
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -239,7 +303,7 @@ const AdminDashboard = () => {
 
       {/* Display Student Details */}
       {studentData && (
-        <div>
+        <div className="mb-4">
           <h3 className="text-xl font-semibold mb-2">Student Details</h3>
           <p><strong>Full Name:</strong> {studentData.fullName}</p>
           <p><strong>Enrollment ID:</strong> {studentData.enrollmentId}</p>
@@ -248,6 +312,119 @@ const AdminDashboard = () => {
           <p><strong>Division:</strong> {studentData.division}</p>
           <p><strong>Email:</strong> {studentData.email}</p>
           <p><strong>Role:</strong> {studentData.role}</p>
+          <button
+            onClick={() => handleEditClick(studentData)}
+            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Edit Student
+          </button>
+        </div>
+      )}
+
+      {/* Edit User Form */}
+      {editingUser && (
+        <div className="border rounded p-4 mb-4">
+          <h3 className="text-xl font-semibold mb-2">Edit User</h3>
+          <form onSubmit={handleUpdateSubmit}>
+            <div className="mb-2">
+              <label className="block">Full Name:</label>
+              <input
+                type="text"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleInputChange}
+                className="w-full border rounded p-2"
+              />
+            </div>
+            {editingUser.role === 'Student' && (
+              <>
+                <div className="mb-2">
+                  <label className="block">Enrollment ID:</label>
+                  <input
+                    type="text"
+                    name="enrollmentId"
+                    value={formData.enrollmentId}
+                    onChange={handleInputChange}
+                    className="w-full border rounded p-2"
+                  />
+                </div>
+                <div className="mb-2">
+                  <label className="block">Roll No:</label>
+                  <input
+                    type="text"
+                    name="rollNo"
+                    value={formData.rollNo}
+                    onChange={handleInputChange}
+                    className="w-full border rounded p-2"
+                  />
+                </div>
+                <div className="mb-2">
+                  <label className="block">Year of Study:</label>
+                  <select
+                    name="yearOfStudy"
+                    value={formData.yearOfStudy}
+                    onChange={handleInputChange}
+                    className="w-full border rounded p-2"
+                  >
+                    <option value="">Select Year</option>
+                    <option value="First">First</option>
+                    <option value="Second">Second</option>
+                    <option value="Third">Third</option>
+                    <option value="Fourth">Fourth</option>
+                  </select>
+                </div>
+                <div className="mb-2">
+                  <label className="block">Division:</label>
+                  <input
+                    type="text"
+                    name="division"
+                    value={formData.division}
+                    onChange={handleInputChange}
+                    className="w-full border rounded p-2"
+                  />
+                </div>
+              </>
+            )}
+            <div className="mb-2">
+              <label className="block">Email:</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="w-full border rounded p-2"
+                required
+              />
+            </div>
+            <div className="mb-2">
+              <label className="block">Role:</label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleInputChange}
+                className="w-full border rounded p-2"
+              >
+                <option value="Admin">Admin</option>
+                <option value="Faculty">Faculty</option>
+                <option value="Student">Student</option>
+              </select>
+            </div>
+            <div className="flex">
+              <button
+                type="submit"
+                className="mr-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditingUser(null)}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
       )}
     </div>
