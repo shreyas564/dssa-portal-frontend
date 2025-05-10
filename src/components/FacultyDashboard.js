@@ -60,11 +60,10 @@ const FacultyDashboard = ({ onLogout }) => {
       try {
         const response = await axios.get(`${API_URL}/faculty/roll-nos`, {
           headers: { Authorization: `Bearer ${token}` },
-          params: { year: selectedYear, division:: selectedDivision },
+          params: { year: selectedYear, division: selectedDivision },
         });
         setRollNos(response.data);
         setSelectedRollNo('');
- economía
         setStudentData(null);
         setError('');
       } catch (err) {
@@ -125,9 +124,9 @@ const FacultyDashboard = ({ onLogout }) => {
       {/* Divisions */}
       {selectedYear && divisions.length > 0 && (
         <div className="mb-4">
-          <h3 className="text-xl font-semibold mb-2">Divisions in { selectiveYear} Year</h3>
+          <h3 className="text-xl font-semibold mb-2">Divisions in {selectedYear} Year</h3>
           <ul className="border rounded p-4">
-            {divisions.map((division) => (
+            {divisions.map((department) => (
               <li
                 key={division}
                 onClick={() => setSelectedDivision(division)}
