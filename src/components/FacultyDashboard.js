@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
 
 const FacultyDashboard = () => {
   const [years, setYears] = useState([]);
@@ -13,13 +13,13 @@ const FacultyDashboard = () => {
   const [error, setError] = useState('');
 
   const token = localStorage.getItem('token');
-  const API_URL = process.env.REACT_APP_API_URL || 'https://dssa-portal-backend.onrender.com';
-  const navigate = useNavigate();
+  const API_URL = process.env.REACT_APP_API_URL;
+  const navigate = useNavigate(); // Hook for navigation
 
-  // Handle logout (simplified to match Student Dashboard)
+  // Handle logout
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+    localStorage.removeItem('token'); // Remove the token from localStorage
+    navigate('/login'); // Redirect to the login page
   };
 
   // Fetch years
@@ -32,12 +32,8 @@ const FacultyDashboard = () => {
         setYears(response.data);
         setError('');
       } catch (err) {
-        setError('Failed to fetch years: ' + (err.response?.data?.error || err.message));
+        setError('Failed to fetch years');
         setYears([]);
-        if (err.response?.status === 401) {
-          localStorage.removeItem('token');
-          navigate('/login');
-        }
       }
     };
     fetchYears();
@@ -58,12 +54,8 @@ const FacultyDashboard = () => {
         setStudentData(null);
         setError('');
       } catch (err) {
-        setError('Failed to fetch divisions: ' + (err.response?.data?.error || err.message));
+        setError('Failed to fetch divisions');
         setDivisions([]);
-        if (err.response?.status === 401) {
-          localStorage.removeItem('token');
-          navigate('/login');
-        }
       }
     };
     fetchDivisions();
@@ -83,12 +75,8 @@ const FacultyDashboard = () => {
         setStudentData(null);
         setError('');
       } catch (err) {
-        setError('Failed to fetch roll numbers: ' + (err.response?.data?.error || err.message));
+        setError('Failed to fetch roll numbers');
         setRollNos([]);
-        if (err.response?.status === 401) {
-          localStorage.removeItem('token');
-          navigate('/login');
-        }
       }
     };
     fetchRollNos();
@@ -105,12 +93,8 @@ const FacultyDashboard = () => {
       setSelectedRollNo(rollNoData.rollNo);
       setError('');
     } catch (err) {
-      setError('Failed to fetch student details: ' + (err.response?.data?.error || err.message));
+      setError('Failed to fetch student details');
       setStudentData(null);
-      if (err.response?.status === 401) {
-        localStorage.removeItem('token');
-        navigate('/login');
-      }
     }
   };
 
