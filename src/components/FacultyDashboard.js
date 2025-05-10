@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
 
 const FacultyDashboard = () => {
   const [years, setYears] = useState([]);
@@ -13,8 +14,15 @@ const FacultyDashboard = () => {
 
   const token = localStorage.getItem('token');
   const API_URL = process.env.REACT_APP_API_URL;
+  const navigate = useNavigate(); // Hook for navigation
 
-  // Fetch years on component mount
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // Remove the token from localStorage
+    navigate('/login'); // Redirect to the login page
+  };
+
+  // Fetch years
   useEffect(() => {
     const fetchYears = async () => {
       try {
@@ -22,14 +30,16 @@ const FacultyDashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setYears(response.data);
+        setError('');
       } catch (err) {
         setError('Failed to fetch years');
+        setYears([]);
       }
     };
     fetchYears();
   }, []);
 
-  // Fetch divisions when a year is selected
+  // Fetch divisions for a selected year
   useEffect(() => {
     if (!selectedYear) return;
     const fetchDivisions = async () => {
@@ -39,17 +49,19 @@ const FacultyDashboard = () => {
           params: { year: selectedYear },
         });
         setDivisions(response.data);
-        setSelectedDivision(''); // Reset division
-        setRollNos([]); // Reset roll numbers
-        setStudentData(null); // Reset student data
+        setSelectedDivision('');
+        setRollNos([]);
+        setStudentData(null);
+        setError('');
       } catch (err) {
         setError('Failed to fetch divisions');
+        setDivisions([]);
       }
     };
     fetchDivisions();
   }, [selectedYear]);
 
-  // Fetch roll numbers when a division is selected
+  // Fetch roll numbers for a selected division
   useEffect(() => {
     if (!selectedYear || !selectedDivision) return;
     const fetchRollNos = async () => {
@@ -59,16 +71,18 @@ const FacultyDashboard = () => {
           params: { year: selectedYear, division: selectedDivision },
         });
         setRollNos(response.data);
-        setSelectedRollNo(''); // Reset roll number
-        setStudentData(null); // Reset student data
+        setSelectedRollNo('');
+        setStudentData(null);
+        setError('');
       } catch (err) {
         setError('Failed to fetch roll numbers');
+        setRollNos([]);
       }
     };
     fetchRollNos();
   }, [selectedYear, selectedDivision]);
 
-  // Fetch student marks when a roll number is selected
+  // Fetch student details and marks
   const handleRollNoClick = async (rollNoData) => {
     try {
       const response = await axios.get(`${API_URL}/faculty/student-marks`, {
@@ -77,64 +91,72 @@ const FacultyDashboard = () => {
       });
       setStudentData(response.data);
       setSelectedRollNo(rollNoData.rollNo);
+      setError('');
     } catch (err) {
-      setError('Failed to fetch student marks');
+      setError('Failed to fetch student details');
+      setStudentData(null);
     }
   };
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Faculty Dashboard</h2>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-
-      {/* Select Year */}
-      <div className="mb-4">
-        <label className="block text-lg font-medium mb-2">Select Year</label>
-        <select
-          value={selectedYear}
-          onChange={(e) => setSelectedYear(e.target.value)}
-          className="border rounded p-2 w-full"
+      {/* Header with Title and Logout Button */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">Faculty Dashboard</h2>
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
         >
-          <option value="">-- Select Year --</option>
-          {years.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
+          Logout
+        </button>
       </div>
 
-      {/* Select Division */}
-      {selectedYear && (
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+
+      {/* Year Buttons */}
+      {years.length > 0 && (
         <div className="mb-4">
-          <label className="block text-lg font-medium mb-2">Select Division</label>
-          <select
-            value={selectedDivision}
-            onChange={(e) => setSelectedDivision(e.target.value)}
-            className="border rounded p-2 w-full"
-          >
-            <option value="">-- Select Division --</option>
-            {divisions.map((division) => (
-              <option key={division} value={division}>
-                {division}
-              </option>
-            ))}
-          </select>
+          <h3 className="text-xl font-semibold mb-2">Select Year</h3>
+          {years.map((year) => (
+            <button
+              key={year}
+              onClick={() => setSelectedYear(year)}
+              className={`mr-2 px-4 py-2 rounded ${selectedYear === year ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+            >
+              {year} Year
+            </button>
+          ))}
         </div>
       )}
 
-      {/* Display Roll Numbers */}
+      {/* Divisions */}
+      {selectedYear && divisions.length > 0 && (
+        <div className="mb-4">
+          <h3 className="text-xl font-semibold mb-2">Divisions in {selectedYear} Year</h3>
+          <ul className="border rounded p-4">
+            {divisions.map((division) => (
+              <li
+                key={division}
+                onClick={() => setSelectedDivision(division)}
+                className={`cursor-pointer p-2 hover:bg-gray-200 ${selectedDivision === division ? 'bg-gray-300' : ''}`}
+              >
+                {division}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Roll Numbers */}
       {selectedDivision && rollNos.length > 0 && (
         <div className="mb-4">
-          <label className="block text-lg font-medium mb-2">Roll Numbers</label>
+          <h3 className="text-xl font-semibold mb-2">Roll Numbers in Division {selectedDivision}</h3>
           <ul className="border rounded p-4">
             {rollNos.map((rollNoData) => (
               <li
                 key={rollNoData.rollNo}
                 onClick={() => handleRollNoClick(rollNoData)}
-                className={`cursor-pointer p-2 hover:bg-gray-200 ${
-                  selectedRollNo === rollNoData.rollNo ? 'bg-gray-300' : ''
-                }`}
+                className={`cursor-pointer p-2 hover:bg-gray-200 ${selectedRollNo === rollNoData.rollNo ? 'bg-gray-300' : ''}`}
               >
                 {rollNoData.rollNo}
               </li>
@@ -143,9 +165,9 @@ const FacultyDashboard = () => {
         </div>
       )}
 
-      {/* Display Student Marks */}
+      {/* Student Details and Marks */}
       {studentData && (
-        <div>
+        <div className="mb-4">
           <h3 className="text-xl font-semibold mb-2">Student Details</h3>
           <p><strong>Full Name:</strong> {studentData.fullName}</p>
           <p><strong>Enrollment ID:</strong> {studentData.enrollmentId}</p>
@@ -153,14 +175,14 @@ const FacultyDashboard = () => {
           <p><strong>Year of Study:</strong> {studentData.yearOfStudy}</p>
           <p><strong>Division:</strong> {studentData.division}</p>
           <p><strong>Email:</strong> {studentData.email}</p>
-          <h4 className="text-lg font-medium mt-4 mb-2">Marks</h4>
-          {studentData.marks.length > 0 ? (
+
+          <h4 className="text-lg font-semibold mt-4 mb-2">Marks</h4>
+          {studentData.marks && studentData.marks.length > 0 ? (
             <table className="w-full border-collapse border">
               <thead>
                 <tr className="bg-gray-200">
                   <th className="border p-2">Course Name</th>
                   <th className="border p-2">Score</th>
-                  <th className="border p-2">Timestamp</th>
                 </tr>
               </thead>
               <tbody>
@@ -168,7 +190,6 @@ const FacultyDashboard = () => {
                   <tr key={index}>
                     <td className="border p-2">{mark.courseName}</td>
                     <td className="border p-2">{mark.score}</td>
-                    <td className="border p-2">{new Date(mark.timestamp).toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
