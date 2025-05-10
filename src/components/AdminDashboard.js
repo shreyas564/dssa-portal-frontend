@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
   const [selectedRole, setSelectedRole] = useState('');
@@ -18,12 +18,30 @@ const AdminDashboard = () => {
 
   const token = localStorage.getItem('token');
   const API_URL = process.env.REACT_APP_API_URL;
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
+
+  // Debug: Log navigate to ensure it's available
+  console.log('Navigate hook:', navigate);
+
+  // Check token on mount and redirect if missing
+  useEffect(() => {
+    if (!token) {
+      console.log('No token found, redirecting to login');
+      navigate('/login');
+    }
+  }, [token, navigate]);
 
   // Handle logout
   const handleLogout = () => {
-    localStorage.removeItem('token'); // Remove the token from localStorage
-    navigate('/login'); // Redirect to the login page
+    console.log('Logout button clicked');
+    try {
+      localStorage.removeItem('token');
+      console.log('Token removed from localStorage');
+      navigate('/login');
+      console.log('Navigation to /login triggered');
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   // Fetch users by role
