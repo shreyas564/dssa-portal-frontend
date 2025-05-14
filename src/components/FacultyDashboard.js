@@ -34,45 +34,29 @@ const FacultyDashboard = ({ onLogout }) => {
 
   // Fetch divisions for a selected year
 useEffect(() => {
-    if (!selectedYear) return;
-    const fetchDivisions = async () => {
-      try {
-        const normalizedYear = selectedYear.replace(/\s/g, '');
-        console.log('Fetching divisions with:', {
-          API_URL,
-          year: normalizedYear,
-          token: token ? token.substring(0, 20) + '...' : 'Missing'
-        });
-
-        const response = await axios.get(`${API_URL}/faculty/divisions`, {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { year: normalizedYear },
-        });
-
-        console.log('Divisions response:', response.data);
-        setDivisions(response.data);
-        setSelectedDivision('');
-        setRollNos([]);
-        setStudentData(null);
-        setEditingUser(null);
-        setError('');
-      } catch (err) {
-        console.error('Error fetching divisions:', {
-          message: err.message,
-          response: err.response ? {
-            status: err.response.status,
-            data: err.response.data,
-            headers: err.response.headers
-          } : 'No response',
-          request: err.request ? err.request : 'No request'
-        });
-
-        setError(err.response?.data?.error || 'Failed to fetch divisions');
-        setDivisions([]);
-      }
-    };
-    fetchDivisions();
-  }, [selectedYear]);
+  if (!selectedYear) return;
+  console.log('Fetching divisions for year:', selectedYear);
+  const fetchDivisions = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/faculty/divisions`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { year: selectedYear },
+      });
+      console.log('Divisions received:', response.data);
+      setDivisions(response.data);
+      setSelectedDivision('');
+      setRollNos([]);
+      setStudentData(null);
+      setEditingUser(null);
+      setError('');
+    } catch (err) {
+      console.error('Error fetching divisions:', err);
+      setError('Failed to fetch divisions');
+      setDivisions([]);
+    }
+  };
+  fetchDivisions();
+}, [selectedYear]);
 
   // Fetch roll numbers for a selected division
   useEffect(() => {
