@@ -36,9 +36,11 @@ useEffect(() => {
     if (!selectedYear) return;
     const fetchDivisions = async () => {
       try {
+        // Normalize selectedYear: "Third Year" -> "ThirdYear"
+        const normalizedYear = selectedYear.replace(/\s/g, '');
         const response = await axios.get(`${API_URL}/faculty/divisions`, {
           headers: { Authorization: `Bearer ${token}` },
-          params: { year: selectedYear },
+          params: { year: normalizedYear }, // Send normalized year
         });
         setDivisions(response.data);
         setSelectedDivision('');
@@ -52,7 +54,7 @@ useEffect(() => {
       }
     };
     fetchDivisions();
-  }, [selectedYear]);
+}, [selectedYear]);
 
   // Fetch roll numbers for a selected division
   useEffect(() => {
