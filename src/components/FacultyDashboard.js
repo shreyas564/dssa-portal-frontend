@@ -46,7 +46,6 @@ useEffect(() => {
       setSelectedDivision('');
       setRollNos([]);
       setStudentData(null);
-      setEditingUser(null);
       setError('');
     } catch (err) {
       console.error('Error fetching divisions:', err);
