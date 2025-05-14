@@ -54,7 +54,7 @@ function App() {
           ) : (
             <div className="landing-container">
               <div className="landing-card">
-                <h1>Welcome to DSSA Portal</h1>
+                <h1>Welcome to Data Science Portal</h1>
                 <p>Please choose an option to continue</p>
                 <div className="landing-buttons">
                   <Link to="/login">
