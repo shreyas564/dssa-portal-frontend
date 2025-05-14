@@ -58,7 +58,7 @@ function Login({ onLogin }) {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h2>Login to DSSA Portal</h2>
+        <h2>Login to Data Science Portal</h2>
         {!otpSent ? (
           <form onSubmit={handleSendOtp}>
             <div className="form-group">
