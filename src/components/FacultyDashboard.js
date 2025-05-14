@@ -10,6 +10,7 @@ const FacultyDashboard = ({ onLogout }) => {
   const [selectedRollNo, setSelectedRollNo] = useState('');
   const [studentData, setStudentData] = useState(null);
   const [error, setError] = useState('');
+  const [editingUser, setEditingUser] = useState(null);
 
   const token = localStorage.getItem('token');
   const API_URL = process.env.REACT_APP_API_URL;
