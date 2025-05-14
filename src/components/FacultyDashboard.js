@@ -32,11 +32,11 @@ const FacultyDashboard = ({ onLogout }) => {
   }, []);
 
   // Fetch divisions for a selected year
-  useEffect(() => {
+useEffect(() => {
     if (!selectedYear) return;
     const fetchDivisions = async () => {
       try {
-        const response = await axios.get(`${API_URL}/faculty/divisions`, {
+        const response = await axios.get(`${API_URL}/faculty/student-divisions`, {
           headers: { Authorization: `Bearer ${token}` },
           params: { year: selectedYear },
         });
@@ -44,6 +44,7 @@ const FacultyDashboard = ({ onLogout }) => {
         setSelectedDivision('');
         setRollNos([]);
         setStudentData(null);
+        setEditingUser(null);
         setError('');
       } catch (err) {
         setError('Failed to fetch divisions');
