@@ -38,10 +38,18 @@ useEffect(() => {
       try {
         // Normalize selectedYear: "Third Year" -> "ThirdYear"
         const normalizedYear = selectedYear.replace(/\s/g, '');
+        console.log('Fetching divisions with:', {
+          API_URL,
+          year: normalizedYear,
+          token: token.substring(0, 20) + '...' // Log first 20 chars of token for security
+        });
+
         const response = await axios.get(`${API_URL}/faculty/divisions`, {
           headers: { Authorization: `Bearer ${token}` },
-          params: { year: normalizedYear }, // Send normalized year
+          params: { year: normalizedYear },
         });
+
+        console.log('Divisions response:', response.data);
         setDivisions(response.data);
         setSelectedDivision('');
         setRollNos([]);
@@ -49,7 +57,18 @@ useEffect(() => {
         setEditingUser(null);
         setError('');
       } catch (err) {
-        setError('Failed to fetch divisions');
+        // Log the full error object
+        console.error('Error fetching divisions:', {
+          message: err.message,
+          response: err.response ? {
+            status: err.response.status,
+            data: err.response.data,
+            headers: err.response.headers
+          } : 'No response',
+          request: err.request ? err.request : 'No request'
+        });
+
+        setError(err.response?.data?.error || 'Failed to fetch divisions');
         setDivisions([]);
       }
     };
