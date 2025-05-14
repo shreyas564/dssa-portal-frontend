@@ -124,23 +124,16 @@ useEffect(() => {
         </div>
       )}
 
-      {/* Divisions */}
-      {selectedYear && divisions.length > 0 && (
-        <div className="mb-4">
-          <h3 className="text-xl font-semibold mb-2">Divisions in {selectedYear} Year</h3>
-          <ul className="border rounded p-4">
-            {divisions.map((department) => (
-              <li
-                key={division}
-                onClick={() => setSelectedDivision(division)}
-                className={`cursor-pointer p-2 hover:bg-gray-200 ${selectedDivision === division ? 'bg-gray-300' : ''}`}
-              >
-                {division}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+{divisions.map((division) => (
+  <li
+    key={division}
+    onClick={() => setSelectedDivision(division)}
+    className={`cursor-pointer p-2 hover:bg-gray-200 ${selectedDivision === division ? 'bg-gray-300' : ''}`}
+  >
+    {division}
+  </li>
+))}
+
 
       {/* Roll Numbers */}
       {selectedDivision && rollNos.length > 0 && (
