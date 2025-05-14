@@ -61,7 +61,7 @@ function Register({ onRegister }) {
   return (
     <div className="register-container">
       <div className="register-card">
-        <h2>Register for DSSA Portal</h2>
+        <h2>Register for Data Science Portal</h2>
         {!otpSent ? (
           <form onSubmit={handleSendOtp}>
             <div className="form-group">
