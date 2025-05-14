@@ -36,7 +36,7 @@ useEffect(() => {
     if (!selectedYear) return;
     const fetchDivisions = async () => {
       try {
-        const response = await axios.get(`${API_URL}/faculty/student-divisions`, {
+        const response = await axios.get(`${API_URL}/faculty/divisions`, {
           headers: { Authorization: `Bearer ${token}` },
           params: { year: selectedYear },
         });
